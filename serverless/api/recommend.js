@@ -93,7 +93,7 @@ async function fetchGPT(genres) {
 }
 
 async function fetchTMDB(title) {
-  const url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&language=ko`;
+  const url = `https://api.themoviedb.org/3/search/movie?query=${title}&language=ko`;
 
   const res = await fetch(url, {
     headers: {
