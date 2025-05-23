@@ -10,7 +10,7 @@ export default function SurveyModal({ onClose }) {
     const genres = formData.getAll("genre");
 
     try {
-      const res = await fetch("/api/recommend", {
+      const res = await fetch("https://ai-movie-recommand.vercel.app/api/recommend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ genres }),

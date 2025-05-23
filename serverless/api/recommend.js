@@ -1,8 +1,21 @@
+// serverless/api/recommend.js
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Only POST allowed' });
+  // ✅ preflight 요청에 대한 응답
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    return res.status(200).end();
   }
 
+  // ✅ POST 요청만 처리
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Only POST allowed" });
+  }
+
+  res.setHeader("Access-Control-Allow-Origin", "*");
+
+  // 🧠 OpenAI 호출 로직 그대로 이어지면 됨
   const { genres } = req.body;
   const prompt = `사용자는 다음 장르의 영화를 좋아합니다: ${genres.join(", ")}. 
 영화 제목 하나만 추천해주세요. 설명 없이 제목만 출력해주세요.`;
@@ -31,4 +44,3 @@ export default async function handler(req, res) {
     res.status(500).json({ error: "OpenAI 호출 실패", detail: error.message });
   }
 }
-
