@@ -4,7 +4,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* 탭 메뉴가 상단에 보여야 함 */
+  padding: 40px 20px;
   font-family: 'Courier New', Courier, monospace;
 }
 
@@ -27,4 +28,36 @@
 
 .open-btn:hover {
   background-color: #b5838d;
+}
+
+.menu-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.tab-btn {
+  font-size: 1rem;
+  padding: 10px 20px;
+  border: 2px solid #d4a373;
+  background-color: white;
+  color: #222;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.tab-btn:hover {
+  background-color: #faedcd;
+}
+
+.tab-btn.active {
+  background-color: #d4a373;
+  color: white;
+}
+
+.tab-content {
+  width: 100%;
+  max-width: 800px;
 }

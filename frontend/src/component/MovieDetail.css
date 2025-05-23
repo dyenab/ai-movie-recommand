@@ -1,6 +1,5 @@
-/* /component/MovieDetail.css */
-
 .movie-card {
+  position: relative;
   display: flex;
   gap: 16px;
   background-color: #f9f9f9;
@@ -40,3 +39,19 @@
   font-size: 13px;
   color: #666;
 }
+
+.like-button {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.like-button:hover {
+  transform: scale(1.2);
+}
+

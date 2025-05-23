@@ -22,7 +22,7 @@ export default function SurveyModal({ onClose }) {
 
       const data = await res.json();
       console.log("서버 응답 결과:", data);
-      setAiResponse(data.result); // Zustand에 저장
+      setAiResponse(data.movies); // Zustand에 저장
       setShowButton(true); // 버튼 보이기
     } catch (err) {
       console.error("OpenAI 오류:", err);

@@ -1,18 +1,22 @@
-/* /pages/Result.css */
-
-.result-page {
+.wishlist-page {
   padding: 40px 20px;
-  background-color: #ffffff;
+  background-color: #fff;
   min-height: 100vh;
   box-sizing: border-box;
+  font-family: 'Courier New', Courier, monospace;
 }
 
-.result-title {
+.wishlist-title {
   font-size: 28px;
-  font-weight: bold;
   text-align: center;
   margin-bottom: 32px;
   color: #222;
+}
+
+.empty-msg {
+  text-align: center;
+  font-size: 16px;
+  color: #777;
 }
 
 .movie-list {
