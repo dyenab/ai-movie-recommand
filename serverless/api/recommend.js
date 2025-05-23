@@ -21,6 +21,7 @@ export default async function handler(req, res) {
     const movies = await get3Movies(genres);
     res.status(200).json({ movies });
   } catch (error) {
+    console.error("❌ 서버 에러:", error);
     res.status(500).json({ error: "추천 실패", detail: error.message });
   }
 }
