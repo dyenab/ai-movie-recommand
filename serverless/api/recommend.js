@@ -32,13 +32,18 @@ async function get3Movies(genres) {
 
   while (movies.length < 3 && retry < 5) {
     const titles = await fetchGPT(genres);
+    console.log(`[${retryCount + 1}회차 GPT 응답]`, titles);
 
     for (const title of titles) {
       const clean = title.replace(/^\d+[\.\)]?\s*/, "").trim();
+      console.log("검사 중인 제목:", clean);
+
       if (seen.has(clean)) continue;
       seen.add(clean);
 
       const info = await fetchTMDB(clean);
+      console.log("TMDB 응답:", info);
+      
       if (info) movies.push(info);
       if (movies.length === 3) break;
     }
