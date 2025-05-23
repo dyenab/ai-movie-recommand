@@ -65,7 +65,7 @@ async function fetchGPT(genres) {
   const prompt = `사용자는 다음 장르의 영화를 좋아합니다: ${genres.join(", ")}.
                   이 장르에 해당하는 TMDB 영화 제목 3가지를 추천해주세요.
                   - 매번 다른 영화를 추천해주세요
-                  - 영어 제목은 한국어 발음으로 작성해주세요 (ex : La La Land -> 라라랜드)
+                  - 영어 제목을 사용하세요
                   - 제목 외에는 어떤 텍스트도 포함하지 마세요
                   - 숫자, 괄호, 설명 없이 **영화 제목만**
                   - 각 영화 제목은 줄바꿈(enter)으로만 구분
@@ -93,10 +93,12 @@ async function fetchGPT(genres) {
 }
 
 async function fetchTMDB(title) {
-  const res = await fetch(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&language=ko`, {
+  const apiKey = process.env.TMDB_API_KEY;
+  const url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&language=ko&api_key=${apiKey}`;
+
+  const res = await fetch(url, {
     method: "GET",
     headers: {
-      "Authorization": `Bearer ${process.env.TMDB_ACCESS_TOKEN}`,
       "Content-Type": "application/json;charset=utf-8",
     },
   });
@@ -104,5 +106,6 @@ async function fetchTMDB(title) {
   const data = await res.json();
   return data.results?.[0] || null;
 }
+
 
 
