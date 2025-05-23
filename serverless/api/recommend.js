@@ -37,7 +37,12 @@ async function get3Movies(genres) {
     console.log(`[${retry + 1}회차 GPT 응답]`, titles);
 
     for (const title of titles) {
-      const clean = title.replace(/^\d+[\.\)]?\s*/, "").trim();
+      console.log("📦 원본 문자열 코드:", [...title].map(c => c.charCodeAt(0)));
+      const clean = title.replace(/^\d+[\.\)]?\s*/, "")
+                          .normalize("NFKC")
+                          .replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000]/g, "")
+                          .trim();
+
       console.log("검사 중인 제목:", clean);
 
       if (seen.has(clean)) continue;
