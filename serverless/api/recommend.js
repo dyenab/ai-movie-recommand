@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 }
 
 async function get3Movies(genres) {
-  consoke.log("장르:", genres);
+  console.log("장르:", genres);
   const movies = [];
   const seen = new Set();
   let retry = 0;
