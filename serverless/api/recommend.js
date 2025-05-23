@@ -1,6 +1,4 @@
-// serverless/api/recommend.js
 export default async function handler(req, res) {
-  // ✅ preflight 요청에 대한 응답
   if (req.method === "OPTIONS") {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -8,39 +6,81 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // ✅ POST 요청만 처리
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Only POST allowed" });
   }
 
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  // 🧠 OpenAI 호출 로직 그대로 이어지면 됨
   const { genres } = req.body;
-  const prompt = `사용자는 다음 장르의 영화를 좋아합니다: ${genres.join(", ")}. 
-                  이 장르로 분류된 대표적인 영화 제목 3개만 추천해주세요. 설명이랑 번호 없이 제목만 줄바꿈으로 구분해서 출력해주세요.`;
+  if (!genres || !Array.isArray(genres)) {
+    return res.status(400).json({ error: "genres가 필요합니다." });
+  }
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          { role: "system", content: "당신은 영화 추천 시스템입니다." },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.7,
-      }),
-    });
-
-    const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content?.trim();
-    res.status(200).json({ result: reply });
+    const movies = await get3Movies(genres);
+    res.status(200).json({ movies });
   } catch (error) {
-    res.status(500).json({ error: "OpenAI 호출 실패", detail: error.message });
+    res.status(500).json({ error: "추천 실패", detail: error.message });
   }
 }
+
+async function get3Movies(genres) {
+  const movies = [];
+  const seen = new Set();
+  let retry = 0;
+
+  while (movies.length < 3 && retry < 5) {
+    const titles = await fetchGPT(genres);
+
+    for (const title of titles) {
+      const clean = title.replace(/^\d+[\.\)]?\s*/, "").trim();
+      if (seen.has(clean)) continue;
+      seen.add(clean);
+
+      const info = await fetchTMDB(clean);
+      if (info) movies.push(info);
+      if (movies.length === 3) break;
+    }
+
+    retry++;
+  }
+
+  return movies;
+}
+
+async function fetchGPT(genres) {
+  const prompt = `사용자는 다음 장르의 영화를 좋아합니다: ${genres.join(", ")}.
+                  TMDB에 등록된 영화 제목 3가지를 추천해주세요.
+                  설명이나 번호 없이 제목만 한 줄에 하나씩 출력해주세요.`;
+
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: [
+        { role: "system", content: "당신은 영화 추천 시스템입니다." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.7,
+    }),
+  });
+
+  const data = await res.json();
+  const raw = data.choices?.[0]?.message?.content?.trim() || "";
+  return raw.split("\n").map(t => t.trim()).filter(Boolean);
+}
+
+async function fetchTMDB(title) {
+  const apiKey = process.env.TMDB_API_KEY;
+  const url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(title)}&language=ko`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.results?.[0] || null;
+}
+
