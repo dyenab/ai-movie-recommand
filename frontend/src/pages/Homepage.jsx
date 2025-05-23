@@ -1,29 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import SurveyModal from "../component/Survey";
-import useResultStore from "../store/useResultStore";
-import "./Homepage.css"; // 선택적으로 배경 스타일
+import "./Homepage.css";
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const setAiResponse = useResultStore((state) => state.setAiResponse);
-  const navigate = useNavigate();
-
-  const handleSurveySubmit = async (genres) => {
-    try {
-      const res = await fetch("/api/recommend", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ genres }),
-      });
-      const data = await res.json();
-      setAiResponse(data.result);         // Zustand에 저장
-      setIsModalOpen(false);              // 모달 닫기
-      navigate("/result");                // 결과 페이지로 이동
-    } catch (error) {
-      console.error("AI 추천 실패:", error);
-    }
-  };
 
   return (
     <div className="homepage">
@@ -34,12 +14,10 @@ export default function HomePage() {
       </button>
 
       {isModalOpen && (
-        <SurveyModal
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleSurveySubmit}
-        />
+        <SurveyModal onClose={() => setIsModalOpen(false)} />
       )}
     </div>
   );
 }
+
 

@@ -1,6 +1,6 @@
 import useResultStore from "../store/useResultStore";
-import SearchInput from "../components/SearchInput";
-import MovieCard from "../components/MovieCard";
+import SearchInput from "../component/SearchInput";
+import { useState } from "react";
 
 export default function ResultPage() {
   const aiResponse = useResultStore((state) => state.aiResponse);
@@ -18,7 +18,7 @@ export default function ResultPage() {
 
       <SearchInput onSearch={handleSearch} />
 
-      {movieInfo && <MovieCard info={movieInfo} />}
+      {movieInfo && <MovieDetail info={movieInfo} />}
     </div>
   );
 }

@@ -1,8 +1,12 @@
 import { useState } from "react";
 import "./Survey.css";
+import useResultStore from "../store/useResultStore";
+import { useNavigate } from "react-router-dom";
 
 export default function SurveyModal({ onClose }) {
-  const [result, setResult] = useState("");
+  const [showButton, setShowButton] = useState(false);
+  const setAiResponse = useResultStore((state) => state.setAiResponse);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,7 +21,8 @@ export default function SurveyModal({ onClose }) {
       });
 
       const data = await res.json();
-      setResult(data.result); // 영화 제목 저장
+      setAiResponse(data.result); // Zustand에 저장
+      setShowButton(true); // 버튼 보이기
     } catch (err) {
       console.error("OpenAI 오류:", err);
     }
@@ -39,14 +44,11 @@ export default function SurveyModal({ onClose }) {
 
         <button type="submit">제출하기</button>
       </form>
-
-      {result && (
-        <div style={{ marginTop: "20px" }}>
-          <h3>🎬 추천 영화:</h3>
-          <p>{result}</p>
-        </div>
+      {showButton && (
+        <button onClick={() => navigate("/result")}>
+          추천 영화 보러가기
+        </button>
       )}
-
       <button onClick={onClose}>닫기</button>
     </div>
   );

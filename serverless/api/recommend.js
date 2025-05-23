@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   // 🧠 OpenAI 호출 로직 그대로 이어지면 됨
   const { genres } = req.body;
   const prompt = `사용자는 다음 장르의 영화를 좋아합니다: ${genres.join(", ")}. 
-                  이 장르로 분류된 대표적인 영화 제목 3개만 추천해주세요. 설명 없이 제목만 줄바꿈으로 구분해서 출력해주세요.`;
+                  이 장르로 분류된 대표적인 영화 제목 3개만 추천해주세요. 설명이랑 번호 없이 제목만 줄바꿈으로 구분해서 출력해주세요.`;
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
