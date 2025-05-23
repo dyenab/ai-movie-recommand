@@ -32,7 +32,7 @@ async function get3Movies(genres) {
 
   while (movies.length < 3 && retry < 5) {
     const titles = await fetchGPT(genres);
-    console.log(`[${retryCount + 1}회차 GPT 응답]`, titles);
+    console.log(`[${retry + 1}회차 GPT 응답]`, titles);
 
     for (const title of titles) {
       const clean = title.replace(/^\d+[\.\)]?\s*/, "").trim();
@@ -43,7 +43,7 @@ async function get3Movies(genres) {
 
       const info = await fetchTMDB(clean);
       console.log("TMDB 응답:", info);
-      
+
       if (info) movies.push(info);
       if (movies.length === 3) break;
     }
@@ -76,6 +76,7 @@ async function fetchGPT(genres) {
   });
 
   const data = await res.json();
+  console.log("🧠 GPT 원문 응답:", data);
   const raw = data.choices?.[0]?.message?.content?.trim() || "";
   return raw.split("\n").map(t => t.trim()).filter(Boolean);
 }
