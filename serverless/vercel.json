@@ -6,8 +6,8 @@
       "methods": ["POST", "OPTIONS"]
     },
     {
-      "src": "/api/search",
-      "dest": "/api/search.js",
+      "src": "/api/searchMovie",
+      "dest": "/api/searchMovie.js",
       "methods": ["POST", "OPTIONS"]
     }
   ]
