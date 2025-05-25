@@ -3,12 +3,12 @@
     {
       "src": "/api/recommend",
       "dest": "/api/recommend.js",
-      "methods": ["POST", "OPTIONS"]
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"]
     },
     {
       "src": "/api/searchMovie",
       "dest": "/api/searchMovie.js",
-      "methods": ["POST", "OPTIONS"]
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"]
     }
   ]
 }
