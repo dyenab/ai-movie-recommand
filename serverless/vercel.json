@@ -1,9 +1,14 @@
 {
   "routes": [
     {
-      "src": "/",
+      "src": "/api/recommend",
       "dest": "/api/recommend.js",
-      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"]
+      "methods": ["POST", "OPTIONS"]
+    },
+    {
+      "src": "/api/search",
+      "dest": "/api/search.js",
+      "methods": ["POST", "OPTIONS"]
     }
   ]
 }
