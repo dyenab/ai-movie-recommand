@@ -35,7 +35,7 @@ async function get3Movies({ genres, weather, season, actor }) {
   let retry = 0;
 
   while (movies.length < 3 && retry < 5) {
-    const titles = await fetchGPT({ genres, weather, season, actor });
+    const titles = await fetchGPT({ genres, weather, season, actor, isRetry: retry > 0 });
     console.log(`[GPT ${retry + 1}회차 응답]`, titles);
 
     for (const title of titles) {
@@ -60,15 +60,17 @@ async function get3Movies({ genres, weather, season, actor }) {
   return movies;
 }
 
-async function fetchGPT({ genres, weather, season, actor }) {
+async function fetchGPT({ genres, weather, season, actor, isRetry = false }) {
   const lines = [
-    `사용자는 다음 장르의 영화를 좋아합니다: ${genres.join(", ")}`,
-    season ? `지금은 ${season}입니다.` : "",
-    weather ? `현재 날씨는 ${weather}입니다.` : "",
-    actor ? `좋아하는 배우는 ${actor}입니다.` : "",
+    `장르: ${genres.join(", ")}`,
+    weather ? `날씨: ${weather}` : "",
+    season ? `계절: ${season}` : "",
+    actor ? `배우: ${actor}` : "",
     "",
-    "이 조건을 고려해 영어 영화 제목 3개를 추천해주세요.",
-    "- 매번 다른 영화를 추천해주세요",
+    isRetry ? "위에 조건을 고려해서 새로운 영화를 다시 추천해주세요" : "",
+
+    "위 조건을 고려해 영어 영화 제목 3개를 추천해주세요.",
+    "- 위  영화를 추천해주세요",
     "- 영어 제목만 출력해주세요",
     "- 숫자, 괄호, 설명 없이",
     "- 각 제목은 줄바꿈으로만 구분해주세요"
