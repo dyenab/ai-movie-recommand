@@ -23,7 +23,7 @@ export default function SearchMovie() {
 
   const fetchMovies = async (body) => {
     try {
-      const res = await fetch("https://ai-movie-recommand.vercel.app/api/search", {
+      const res = await fetch(`/api/search`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

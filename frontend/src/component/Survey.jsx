@@ -21,7 +21,7 @@ export default function SurveyModal({ onClose }) {
     }
 
     try {
-      const res = await fetch("https://ai-movie-recommand.vercel.app/api/recommend", {
+      const res = await fetch(`/api/recommend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ genres, weather, season }),
