@@ -19,6 +19,7 @@ export default function SearchMovie() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [activeGenre, setActiveGenre] = useState(null);
+  const [sortType, setSortType] = useState("popularity");
 
   const fetchMovies = async (body) => {
     try {
@@ -44,33 +45,63 @@ export default function SearchMovie() {
   const handleGenreClick = (id) => {
     setQuery(""); // 검색어 초기화
     setActiveGenre(id);
-    fetchMovies({ genreId: id });
+    fetchMovies({ genreId: id, sortType });
+  };
+
+  const handleSortChange = (type) => {
+    setSortType(type);
+    if (activeGenre) {
+      fetchMovies({ genreId: activeGenre, sortType: type });
+    }
   };
 
   return (
     <div className="search-page">
-      <h2 className="search-title">🔍 영화 검색</h2>
+      <div className="search-controls">
+        <h2 className="search-title">🔍 영화 검색</h2>
 
-      <div className="search-bar">
-        <input
-          type="text"
-          placeholder="영화 제목을 입력하세요"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button onClick={handleSearch}>검색</button>
-      </div>
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="영화 제목을 입력하세요"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <button onClick={handleSearch}>검색</button>
+        </div>
 
-      <div className="genre-buttons">
-        {genreList.map((genre) => (
+        <div className="genre-buttons">
+          {genreList.map((genre) => (
+            <button
+              key={genre.id}
+              className={`genre-btn ${activeGenre === genre.id ? "active" : ""}`}
+              onClick={() => handleGenreClick(genre.id)}
+            >
+              {genre.name}
+            </button>
+          ))}
+        </div>
+
+        <div className="sort-buttons">
           <button
-            key={genre.id}
-            className={`genre-btn ${activeGenre === genre.id ? "active" : ""}`}
-            onClick={() => handleGenreClick(genre.id)}
+            className={`sort-btn ${sortType === "popularity" ? "active" : ""}`}
+            onClick={() => handleSortChange("popularity")}
           >
-            {genre.name}
+            인기순
           </button>
-        ))}
+          <button
+            className={`sort-btn ${sortType === "release_date" ? "active" : ""}`}
+            onClick={() => handleSortChange("release_date")}
+          >
+            최신순
+          </button>
+          <button
+            className={`sort-btn ${sortType === "random" ? "active" : ""}`}
+            onClick={() => handleSortChange("random")}
+          >
+            랜덤
+          </button>
+        </div>
       </div>
 
       <div className="movie-list">

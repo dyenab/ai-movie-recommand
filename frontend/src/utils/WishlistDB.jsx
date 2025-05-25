@@ -1,8 +1,7 @@
-// /utils/wishlistDB.js
 import { openDB } from "idb";
-
 const DB_NAME = "wishlistDB";
 const STORE_NAME = "movies";
+
 
 export async function getDB() {
   return openDB(DB_NAME, 1, {
@@ -15,7 +14,17 @@ export async function getDB() {
 }
 
 export async function addToWishlist(movie) {
+  if (!movie || !movie.id) {
+    throw new Error("유효한 영화 정보가 필요합니다.");
+  }
+
   const db = await getDB();
+  const all = await db.getAll(STORE_NAME)
+
+  if(all.length >= 10) {
+    throw new Error("위시리스트는 최대 10개까지만 가능합니다.");
+  }
+
   await db.put(STORE_NAME, movie);
 }
 

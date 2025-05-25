@@ -17,7 +17,7 @@ export default function HomePage() {
       return (
         <SurveyModal
           onClose={() => setIsModalOpen(false)}
-          onDone={() => {
+          onDone={() => { 
             setIsModalOpen(false);
             navigate("/result");
           }}
@@ -32,28 +32,32 @@ export default function HomePage() {
         return <SearchMovie />;
       default:
         return (
-          <div className="message-section">
+          <>
+            <div className="title">
+              <h1> 고민하지 말고 눌러봐 😎 </h1>
+            </div>
+
             <img
               src="/message.jpg"
-              alt="message"
+              alt="message screenshot"
               className="message-image"
             />
-            <button className="open-btn" onClick={() => setIsModalOpen(true)}>
-              추천 받으러 가기
-            </button>
-            {movieList.length > 0 && (
-              <button
-                className="open-btn"
-                style={{ marginTop: "20px" }}
-                onClick={() => navigate("/result")}
-              >
-                지난 추천 결과 보기
+
+            <div className="button-group">
+              <button className="open-btn" onClick={() => setIsModalOpen(true)}>
+                추천 받으러 가기
               </button>
-            )}
-          </div>
+              {movieList.length > 0 && (
+                <button className="open-btn" onClick={() => navigate("/result")}>
+                  지난 추천 결과 보기
+                </button>
+              )}
+            </div>
+          </>
         );
     }
-  };
+  }    
+
 
   return (
     <div className="homepage">
@@ -77,7 +81,6 @@ export default function HomePage() {
           🔍 영화 검색
         </button>
       </div>
-
       <div className="tab-content">{renderContent()}</div>
     </div>
   );

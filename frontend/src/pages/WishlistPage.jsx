@@ -12,7 +12,7 @@ export default function WishlistPage() {
 
   return (
     <div className="wishlist-page">
-      <h2 className="wishlist-title">💖 내 위시리스트</h2>
+      <h2 className="wishlist-title">❤️ 내 위시리스트</h2>
 
       {movies.length > 0 ? (
         <div className="movie-list">

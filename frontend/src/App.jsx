@@ -1,8 +1,6 @@
-// src/App.jsx
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/Homepage';
 import ResultPage from './pages/Resultpage';
-//import MyPage from './pages/MyPage';
 
 export default function App() {
   return (

@@ -30,8 +30,6 @@ export default async function handler(req, res) {
 }
 
 async function get3Movies({ genres, weather, season }) {
-  console.log("입력된 조건:", { genres, weather, season });
-
   const movies = [];
   const seen = new Set();
   let retry = 0;
@@ -94,8 +92,6 @@ async function fetchGPT({ genres, weather, season, isRetry = false }) {
   });
 
   const data = await res.json();
-  console.log("🧠 GPT 응답:", data);
-
   const raw = data.choices?.[0]?.message?.content?.trim() || "";
   return raw.split("\n").map(t => t.trim()).filter(Boolean);
 }
@@ -106,6 +102,5 @@ async function fetchTMDB(title) {
 
   const res = await fetch(url);
   const data = await res.json();
-  console.log("📦 TMDB 검색 결과:", data);
   return data.results?.[0] || null;
 }

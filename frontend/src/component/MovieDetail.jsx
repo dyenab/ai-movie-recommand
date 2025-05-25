@@ -13,10 +13,15 @@ export default function MovieDetail({ info }) {
   const toggleLike = async () => {
     if (liked) {
       await removeFromWishlist(info.id);
+      setLiked(false);
     } else {
-      await addToWishlist(info);
+      try {
+        await addToWishlist(info);
+        setLiked(true);
+      } catch (err) {
+        alert(err.message);
+      }
     }
-    setLiked(!liked);
   };
 
   return (
@@ -31,7 +36,6 @@ export default function MovieDetail({ info }) {
         <p className="movie-overview">
           {info.overview || "설명이 등록되지 않았습니다."}
         </p>
-        <p className="movie-meta">🔞 성인용: {info.adult ? "⭕️" : "❌"}</p>
       </div>
 
       <button
