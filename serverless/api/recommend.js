@@ -12,13 +12,14 @@ export default async function handler(req, res) {
 
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  const { genres } = req.body;
-  if (!genres || !Array.isArray(genres)) {
-    return res.status(400).json({ error: "genres가 필요합니다." });
+  const { genres, weather, season, actor } = req.body;
+
+  if (!genres || !Array.isArray(genres) || genres.length === 0) {
+    return res.status(400).json({ error: "genres는 필수이며 배열이어야 합니다." });
   }
 
   try {
-    const movies = await get3Movies(genres);
+    const movies = await get3Movies({ genres, weather, season, actor });
     res.status(200).json({ movies });
   } catch (error) {
     console.error("❌ 서버 에러:", error);
@@ -26,24 +27,22 @@ export default async function handler(req, res) {
   }
 }
 
-async function get3Movies(genres) {
-  console.log("장르:", genres);
+async function get3Movies({ genres, weather, season, actor }) {
+  console.log("입력된 조건:", { genres, weather, season, actor });
+
   const movies = [];
   const seen = new Set();
   let retry = 0;
 
   while (movies.length < 3 && retry < 5) {
-    const titles = await fetchGPT(genres);
-    console.log(`[${retry + 1}회차 GPT 응답]`, titles);
+    const titles = await fetchGPT({ genres, weather, season, actor });
+    console.log(`[GPT ${retry + 1}회차 응답]`, titles);
 
     for (const title of titles) {
-      console.log("📦 원본 문자열 코드:", [...title].map(c => c.charCodeAt(0)));
       const clean = title.replace(/^\d+[\.\)]?\s*/, "")
-                          .normalize("NFKC")
-                          .replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000]/g, "")
-                          .trim();
-
-      console.log("검사 중인 제목:", clean);
+        .normalize("NFKC")
+        .replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000]/g, "")
+        .trim();
 
       if (seen.has(clean)) continue;
       seen.add(clean);
@@ -61,15 +60,22 @@ async function get3Movies(genres) {
   return movies;
 }
 
-async function fetchGPT(genres) {
-  const prompt = `사용자는 다음 장르의 영화를 좋아합니다: ${genres.join(", ")}.
-                  이 장르에 해당하는 TMDB 영화 제목 3가지를 추천해주세요.
-                  - 매번 다른 영화를 추천해주세요
-                  - 영어 제목을 사용하세요
-                  - 제목 외에는 어떤 텍스트도 포함하지 마세요
-                  - 숫자, 괄호, 설명 없이 **영화 제목만**
-                  - 각 영화 제목은 줄바꿈(enter)으로만 구분
-                  `;
+async function fetchGPT({ genres, weather, season, actor }) {
+  const lines = [
+    `사용자는 다음 장르의 영화를 좋아합니다: ${genres.join(", ")}`,
+    season ? `지금은 ${season}입니다.` : "",
+    weather ? `현재 날씨는 ${weather}입니다.` : "",
+    actor ? `좋아하는 배우는 ${actor}입니다.` : "",
+    "",
+    "이 조건을 고려해 영어 영화 제목 3개를 추천해주세요.",
+    "- 매번 다른 영화를 추천해주세요",
+    "- 영어 제목만 출력해주세요",
+    "- 숫자, 괄호, 설명 없이",
+    "- 각 제목은 줄바꿈으로만 구분해주세요"
+  ];
+
+  const prompt = lines.filter(Boolean).join("\n");
+
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -87,7 +93,8 @@ async function fetchGPT(genres) {
   });
 
   const data = await res.json();
-  console.log("🧠 GPT 원문 응답:", data);
+  console.log("🧠 GPT 응답:", data);
+
   const raw = data.choices?.[0]?.message?.content?.trim() || "";
   return raw.split("\n").map(t => t.trim()).filter(Boolean);
 }

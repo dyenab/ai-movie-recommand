@@ -1,25 +1,66 @@
 .homepage {
   min-height: 100vh;
-  background: #fefae0;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* 탭 메뉴가 상단에 보여야 함 */
+  justify-content: flex-start;
   padding: 40px 20px;
   font-family: 'Courier New', Courier, monospace;
 }
 
-.main-title {
-  font-size: 3.5rem;
-  margin-bottom: 30px;
+.menu-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 200px;
+}
+
+.tab-btn {
+  font-size: 1rem;
+  padding: 10px 20px;
+  border: 2px solid #ffffff;
+  background-color: rgb(229, 229, 229);
   color: #222;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.tab-btn:hover {
+  background-color: #89baff;
+}
+
+.tab-btn.active {
+  background-color: #0084ff;
+  color: white;
+}
+
+.tab-content {
+  width: 100%;
+  max-width: 800px;
+}
+
+.message-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.message-image {
+  max-width: 90%;
+  height: auto;
+  margin-bottom: 30px;
+  
 }
 
 .open-btn {
   font-size: 1.2rem;
   padding: 12px 24px;
   border: none;
-  background-color: #d4a373;
+  background-color: #a3a3a3;
   color: white;
   border-radius: 8px;
   cursor: pointer;
@@ -27,37 +68,5 @@
 }
 
 .open-btn:hover {
-  background-color: #b5838d;
-}
-
-.menu-tabs {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 40px;
-}
-
-.tab-btn {
-  font-size: 1rem;
-  padding: 10px 20px;
-  border: 2px solid #d4a373;
-  background-color: white;
-  color: #222;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  font-family: 'Courier New', Courier, monospace;
-}
-
-.tab-btn:hover {
-  background-color: #faedcd;
-}
-
-.tab-btn.active {
-  background-color: #d4a373;
-  color: white;
-}
-
-.tab-content {
-  width: 100%;
-  max-width: 800px;
+  background-color: #777777;
 }

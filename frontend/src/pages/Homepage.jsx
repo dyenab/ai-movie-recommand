@@ -8,7 +8,7 @@ import "./Homepage.css";
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("home"); // 'home', 'wishlist', 'search'
+  const [activeTab, setActiveTab] = useState("home");
   const movieList = useResultStore((state) => state.aiResponse);
   const navigate = useNavigate();
 
@@ -19,7 +19,7 @@ export default function HomePage() {
           onClose={() => setIsModalOpen(false)}
           onDone={() => {
             setIsModalOpen(false);
-            navigate("/result"); // ✅ 설문 완료 후 이동
+            navigate("/result");
           }}
         />
       );
@@ -32,21 +32,25 @@ export default function HomePage() {
         return <SearchMovie />;
       default:
         return (
-          <>
-            <h1 className="main-title">영화 뭐 볼래? 🧐</h1>
+          <div className="message-section">
+            <img
+              src="/message.jpg"
+              alt="message"
+              className="message-image"
+            />
             <button className="open-btn" onClick={() => setIsModalOpen(true)}>
-              설문 시작하기
+              추천 받으러 가기
             </button>
             {movieList.length > 0 && (
               <button
                 className="open-btn"
                 style={{ marginTop: "20px" }}
-                onClick={() => navigate("/result")} // ✅ 지난 추천 보기
+                onClick={() => navigate("/result")}
               >
                 지난 추천 결과 보기
               </button>
             )}
-          </>
+          </div>
         );
     }
   };
@@ -64,7 +68,7 @@ export default function HomePage() {
           className={`tab-btn ${activeTab === "wishlist" ? "active" : ""}`}
           onClick={() => setActiveTab("wishlist")}
         >
-          💖 위시리스트
+          ❤️ 위시리스트
         </button>
         <button
           className={`tab-btn ${activeTab === "search" ? "active" : ""}`}

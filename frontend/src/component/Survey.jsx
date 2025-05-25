@@ -12,12 +12,19 @@ export default function SurveyModal({ onClose }) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const genres = formData.getAll("genre");
+    const weather = formData.get("weather");
+    const actor = formData.get("actor");
+
+    if (genres.length === 0) {
+      alert("장르를 하나 이상 선택해주세요.");
+      return;
+    }
 
     try {
       const res = await fetch("https://ai-movie-recommand.vercel.app/api/recommend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ genres }),
+        body: JSON.stringify({ genres, weather, actor }),
       });
 
       const data = await res.json();
@@ -42,6 +49,24 @@ export default function SurveyModal({ onClose }) {
         <label><input type="checkbox" name="genre" value="범죄" /> 범죄</label><br />
         <label><input type="checkbox" name="genre" value="스릴러" /> 스릴러</label><br />
         <label><input type="checkbox" name="genre" value="전쟁" /> 전쟁</label><br />
+
+        <br />
+        <label>
+          현재 날씨는?
+          <select name="weather">
+            <option value="">선택 안함</option>
+            <option value="맑음">맑음</option>
+            <option value="비">비</option>
+            <option value="눈">눈</option>
+            <option value="흐림">흐림</option>
+          </select>
+        </label>
+
+        <br />
+        <label>
+          좋아하는 배우는?
+          <input type="text" name="actor" placeholder="배우 이름을 입력하세요" />
+        </label>
 
         <button type="submit">제출하기</button>
       </form>
