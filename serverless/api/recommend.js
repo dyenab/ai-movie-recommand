@@ -12,15 +12,26 @@ export default async function handler(req, res) {
 
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  const path = req.url;
+  const {
+    query,
+    genreId,
+    sortType = "popularity",
+    genres,
+    weather,
+    season,
+  } = req.body;
 
-  // ✅ searchMovie 기능 분기
-  if (path.includes("searchMovie")) {
-    const { query, genreId, sortType = "popularity" } = req.body;
+  const hasQuery = typeof query === "string" && query.trim() !== "";
+  const hasGenreId = typeof genreId === "number" && !isNaN(genreId);
+
+  // ✅ TMDB 검색 기능
+  if (hasQuery || hasGenreId) {
     const apiKey = process.env.TMDB_API_KEY;
 
     if (!apiKey) {
-      return res.status(500).json({ error: "TMDB API Key is missing." });
+      return res
+        .status(500)
+        .json({ error: "TMDB API Key is missing." });
     }
 
     let url = "";
@@ -28,9 +39,11 @@ export default async function handler(req, res) {
     const randomPage = Math.floor(Math.random() * 10) + 1;
 
     try {
-      if (query) {
-        url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}&language=ko`;
-      } else if (genreId) {
+      if (hasQuery) {
+        url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(
+          query
+        )}&language=ko`;
+      } else if (hasGenreId) {
         let sortParam = "popularity.desc";
         if (sortType === "release_date") {
           sortParam = "release_date.desc";
@@ -39,8 +52,6 @@ export default async function handler(req, res) {
         }
 
         url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}&language=ko&sort_by=${sortParam}&page=${randomPage}`;
-      } else {
-        return res.status(400).json({ error: "query 또는 genreId 중 하나가 필요합니다." });
       }
 
       const response = await fetch(url);
@@ -58,23 +69,27 @@ export default async function handler(req, res) {
     }
   }
 
-  // ✅ 기본 recommend 기능
-  const { genres, weather, season } = req.body;
-
-  if (!genres || !Array.isArray(genres) || genres.length === 0) {
-    return res.status(400).json({ error: "genres는 필수이며 배열이어야 합니다." });
+  // ✅ GPT 추천 기능
+  if (genres && Array.isArray(genres) && genres.length > 0) {
+    try {
+      const movies = await get3Movies({ genres, weather, season });
+      return res.status(200).json({ movies });
+    } catch (error) {
+      console.error("❌ 서버 에러:", error);
+      return res
+        .status(500)
+        .json({ error: "추천 실패", detail: error.message });
+    }
   }
 
-  try {
-    const movies = await get3Movies({ genres, weather, season });
-    return res.status(200).json({ movies });
-  } catch (error) {
-    console.error("❌ 서버 에러:", error);
-    return res.status(500).json({ error: "추천 실패", detail: error.message });
-  }
+  // ❌ 그 외에는 잘못된 요청
+  return res
+    .status(400)
+    .json({ error: "query/genreId 또는 genres 중 하나는 반드시 포함되어야 합니다." });
 }
 
-// 🔽 Recommend용 GPT + TMDB 함수는 그대로
+// ✅ GPT 추천 관련 함수들 (그대로 유지)
+
 async function get3Movies({ genres, weather, season }) {
   const movies = [];
   const seen = new Set();
@@ -84,7 +99,8 @@ async function get3Movies({ genres, weather, season }) {
     const titles = await fetchGPT({ genres, weather, season, isRetry: retry > 0 });
 
     for (const title of titles) {
-      const clean = title.replace(/^[\d]+[\.\)]?\s*/, "")
+      const clean = title
+        .replace(/^[\d]+[\.\)]?\s*/, "")
         .normalize("NFKC")
         .replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000]/g, "")
         .trim();
@@ -111,12 +127,14 @@ async function fetchGPT({ genres, weather, season, isRetry = false }) {
     weather ? `날씨: ${weather}에 어울리는 영화` : "",
     season ? `계절: ${season}에 어울리는 영화` : "",
     "",
-    isRetry ? "※ 이전과 겹치지 않는 새로운 영화를 다시 추천해주세요." : "",
+    isRetry
+      ? "※ 이전과 겹치지 않는 새로운 영화를 다시 추천해주세요."
+      : "",
     "위 조건을 고려해 영어 영화 제목을 최대 3개까지 추천해주세요.",
     "조건에 맞는 영화가 적다면 1~2개만 추천해도 괜찮습니다.",
     "- 실제 존재하는 영화만 추천해주세요",
     "- 영화 제목만 출력해주세요 (설명, 번호, 기호 없이)",
-    "- 각 제목은 줄바꿈으로만 구분해주세요"
+    "- 각 제목은 줄바꿈으로만 구분해주세요",
   ];
 
   const prompt = lines.filter(Boolean).join("\n");
@@ -125,13 +143,13 @@ async function fetchGPT({ genres, weather, season, isRetry = false }) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
       model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: "당신은 영화 추천 시스템입니다." },
-        { role: "user", content: prompt }
+        { role: "user", content: prompt },
       ],
       temperature: 0.7,
     }),
@@ -139,12 +157,14 @@ async function fetchGPT({ genres, weather, season, isRetry = false }) {
 
   const data = await res.json();
   const raw = data.choices?.[0]?.message?.content?.trim() || "";
-  return raw.split("\n").map(t => t.trim()).filter(Boolean);
+  return raw.split("\n").map((t) => t.trim()).filter(Boolean);
 }
 
 async function fetchTMDB(title) {
   const apiKey = process.env.TMDB_API_KEY;
-  const url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&language=ko&api_key=${apiKey}`;
+  const url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
+    title
+  )}&language=ko&api_key=${apiKey}`;
 
   const res = await fetch(url);
   const data = await res.json();
