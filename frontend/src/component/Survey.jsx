@@ -52,7 +52,19 @@ export default function SurveyModal({ onClose }) {
 
         <br />
         <label>
-          현재 날씨는?
+          좋아하는 계절은?
+          <select name="season">
+            <option value="">선택 안함</option>
+            <option value="봄">봄</option>
+            <option value="여름">여름</option>
+            <option value="가을">가을</option>
+            <option value="겨울">겨울</option>
+          </select>
+        </label>
+
+        <br />
+        <label>
+          좋아하는 날씨는?
           <select name="weather">
             <option value="">선택 안함</option>
             <option value="맑음">맑음</option>

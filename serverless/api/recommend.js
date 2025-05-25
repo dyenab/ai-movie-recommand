@@ -34,9 +34,11 @@ async function get3Movies({ genres, weather, season, actor }) {
   const seen = new Set();
   let retry = 0;
 
-  while (movies.length < 3 && retry < 5) {
-    const titles = await fetchGPT({ genres, weather, season, actor, isRetry: retry > 0 });
+  while (retry < 5) {
+    const titles = await fetchGPT({genres, weather, season, actor, isRetry: retry > 0 });
     console.log(`[GPT ${retry + 1}회차 응답]`, titles);
+
+    let addedThisRound = 0;
 
     for (const title of titles) {
       const clean = title.replace(/^\d+[\.\)]?\s*/, "")
@@ -50,9 +52,15 @@ async function get3Movies({ genres, weather, season, actor }) {
       const info = await fetchTMDB(clean);
       console.log("TMDB 응답:", info);
 
-      if (info) movies.push(info);
-      if (movies.length === 3) break;
+      if (info) {
+        movies.push(info);
+        addedThisRound++;
+        if (movies.length >= 3) break;
+      }
     }
+
+    //아무 영화도 못 받았다면 중단
+    if (addedThisRound === 0) break;
 
     retry++;
   }
@@ -69,7 +77,9 @@ async function fetchGPT({ genres, weather, season, actor, isRetry = false }) {
     "",
     isRetry ? "위에 조건을 고려해서 새로운 영화를 다시 추천해주세요" : "",
 
-    "위 조건을 고려해 영어 영화 제목 3개를 추천해주세요.",
+    "위 조건을 고려해 영어 영화 제목을 최대 3개까지 추천해주세요.",
+    "조건에 맞는 영화가 적다면 1~2개만 추천해도 괜찮습니다.",
+    "영화 제목은 다음과 같은 형식으로 출력해주세요:",
     "- 위  영화를 추천해주세요",
     "- 영어 제목만 출력해주세요",
     "- 숫자, 괄호, 설명 없이",
