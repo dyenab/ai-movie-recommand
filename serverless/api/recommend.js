@@ -1,4 +1,4 @@
-// /api/recommend.js (Vercel serverless function)
+// /api/recommend.js (Vercel serverless function, 배우 조건 제거 버전)
 
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
@@ -14,14 +14,14 @@ export default async function handler(req, res) {
 
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  const { genres, weather, season, actor } = req.body;
+  const { genres, weather, season } = req.body;
 
   if (!genres || !Array.isArray(genres) || genres.length === 0) {
     return res.status(400).json({ error: "genres는 필수이며 배열이어야 합니다." });
   }
 
   try {
-    const movies = await get3Movies({ genres, weather, season, actor });
+    const movies = await get3Movies({ genres, weather, season });
     res.status(200).json({ movies });
   } catch (error) {
     console.error("❌ 서버 에러:", error);
@@ -29,15 +29,15 @@ export default async function handler(req, res) {
   }
 }
 
-async function get3Movies({ genres, weather, season, actor }) {
-  console.log("입력된 조건:", { genres, weather, season, actor });
+async function get3Movies({ genres, weather, season }) {
+  console.log("입력된 조건:", { genres, weather, season });
 
   const movies = [];
   const seen = new Set();
   let retry = 0;
 
   while (retry < 5) {
-    const titles = await fetchGPT({ genres, weather, season, actor, isRetry: retry > 0 });
+    const titles = await fetchGPT({ genres, weather, season, isRetry: retry > 0 });
 
     for (const title of titles) {
       const clean = title.replace(/^[\d]+[\.\)]?\s*/, "")
@@ -48,7 +48,7 @@ async function get3Movies({ genres, weather, season, actor }) {
       if (seen.has(clean)) continue;
       seen.add(clean);
 
-      const info = await fetchTMDB(clean, actor);
+      const info = await fetchTMDB(clean);
       if (info) {
         movies.push(info);
         if (movies.length >= 3) return movies;
@@ -61,12 +61,11 @@ async function get3Movies({ genres, weather, season, actor }) {
   return movies;
 }
 
-async function fetchGPT({ genres, weather, season, actor, isRetry = false }) {
+async function fetchGPT({ genres, weather, season, isRetry = false }) {
   const lines = [
     `장르: ${genres.join(", ")}인 영화`,
     weather ? `날씨: ${weather}에 어울리는 영화` : "",
     season ? `계절: ${season}에 어울리는 영화` : "",
-    actor ? `추천 영화에는 반드시 실제로 ${actor}이(가) 출연한 영화여야 합니다. 출연하지 않은 영화는 절대 포함하지 마세요.` : "",
     "",
     isRetry ? "※ 이전과 겹치지 않는 새로운 영화를 다시 추천해주세요." : "",
     "위 조건을 고려해 영어 영화 제목을 최대 3개까지 추천해주세요.",
@@ -101,24 +100,11 @@ async function fetchGPT({ genres, weather, season, actor, isRetry = false }) {
   return raw.split("\n").map(t => t.trim()).filter(Boolean);
 }
 
-async function fetchTMDB(title, actor) {
+async function fetchTMDB(title) {
   const apiKey = process.env.TMDB_API_KEY;
   const url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&language=ko&api_key=${apiKey}`;
 
   const res = await fetch(url);
   const data = await res.json();
-  const movie = data.results?.[0];
-
-  if (!movie || !actor) return movie;
-
-  // 배우 출연 여부 확인
-  const creditsUrl = `https://api.themoviedb.org/3/movie/${movie.id}/credits?api_key=${apiKey}`;
-  const creditsRes = await fetch(creditsUrl);
-  const creditsData = await creditsRes.json();
-
-  const actorMatch = creditsData.cast?.some((person) =>
-    person.name.toLowerCase().includes(actor.toLowerCase())
-  );
-
-  return actorMatch ? movie : null;
+  return data.results?.[0] || null;
 }
