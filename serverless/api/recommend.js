@@ -1,3 +1,5 @@
+// /api/recommend.js (Vercel serverless function)
+
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -28,6 +30,8 @@ export default async function handler(req, res) {
 }
 
 async function get3Movies({ genres, weather, season, actor }) {
+  console.log("입력된 조건:", { genres, weather, season, actor });
+
   const movies = [];
   const seen = new Set();
   let retry = 0;
@@ -36,7 +40,7 @@ async function get3Movies({ genres, weather, season, actor }) {
     const titles = await fetchGPT({ genres, weather, season, actor, isRetry: retry > 0 });
 
     for (const title of titles) {
-      const clean = title.replace(/^\d+[\.\)]?\s*/, "")
+      const clean = title.replace(/^[\d]+[\.\)]?\s*/, "")
         .normalize("NFKC")
         .replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000]/g, "")
         .trim();
@@ -44,10 +48,9 @@ async function get3Movies({ genres, weather, season, actor }) {
       if (seen.has(clean)) continue;
       seen.add(clean);
 
-      const info = await fetchTMDB(clean);
+      const info = await fetchTMDB(clean, actor);
       if (info) {
         movies.push(info);
-
         if (movies.length >= 3) return movies;
       }
     }
@@ -58,21 +61,18 @@ async function get3Movies({ genres, weather, season, actor }) {
   return movies;
 }
 
-
 async function fetchGPT({ genres, weather, season, actor, isRetry = false }) {
   const lines = [
     `장르: ${genres.join(", ")}인 영화`,
     weather ? `날씨: ${weather}에 어울리는 영화` : "",
     season ? `계절: ${season}에 어울리는 영화` : "",
-    actor ? `추천 영화에는 반드시 배우: ${actor}이 출련해야 합니다.` : "",
+    actor ? `추천 영화에는 반드시 실제로 ${actor}이(가) 출연한 영화여야 합니다. 출연하지 않은 영화는 절대 포함하지 마세요.` : "",
     "",
-    isRetry ? "위에 조건을 고려해서 새로운 영화를 다시 추천해주세요" : "",
-
-    "영화 제목은 최대 3개까지만 추천하고, 억지로 답하려 하지 말고 없으면 없는대로 빈 문자열을 반환해주세요. 아주 중요합니다.",
-    "영화 제목은 다음과 같은 형식으로 출력해주세요:",
-    "- 위  영화를 추천해주세요",
-    "- 영어 제목만 출력해주세요",
-    "- 숫자, 괄호, 설명 없이",
+    isRetry ? "※ 이전과 겹치지 않는 새로운 영화를 다시 추천해주세요." : "",
+    "위 조건을 고려해 영어 영화 제목을 최대 3개까지 추천해주세요.",
+    "조건에 맞는 영화가 적다면 1~2개만 추천해도 괜찮습니다.",
+    "- 실제 존재하는 영화만 추천해주세요",
+    "- 영화 제목만 출력해주세요 (설명, 번호, 기호 없이)",
     "- 각 제목은 줄바꿈으로만 구분해주세요"
   ];
 
@@ -101,20 +101,24 @@ async function fetchGPT({ genres, weather, season, actor, isRetry = false }) {
   return raw.split("\n").map(t => t.trim()).filter(Boolean);
 }
 
-async function fetchTMDB(title) {
+async function fetchTMDB(title, actor) {
   const apiKey = process.env.TMDB_API_KEY;
   const url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&language=ko&api_key=${apiKey}`;
 
-  const res = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json;charset=utf-8",
-    },
-  });
-
+  const res = await fetch(url);
   const data = await res.json();
-  return data.results?.[0] || null;
+  const movie = data.results?.[0];
+
+  if (!movie || !actor) return movie;
+
+  // 배우 출연 여부 확인
+  const creditsUrl = `https://api.themoviedb.org/3/movie/${movie.id}/credits?api_key=${apiKey}`;
+  const creditsRes = await fetch(creditsUrl);
+  const creditsData = await creditsRes.json();
+
+  const actorMatch = creditsData.cast?.some((person) =>
+    person.name.toLowerCase().includes(actor.toLowerCase())
+  );
+
+  return actorMatch ? movie : null;
 }
-
-
-
