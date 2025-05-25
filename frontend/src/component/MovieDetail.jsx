@@ -1,15 +1,12 @@
 import "./MovieDetail.css";
 import { useEffect, useState } from "react";
-import {
-  addToWishlist,
-  removeFromWishlist,
-  isInWishlist,
-} from "../utils/wishlistDB";
+import {addToWishlist, removeFromWishlist, isInWishlist, } from "../utils/wishlistDB";
 
 export default function MovieDetail({ info }) {
   const [liked, setLiked] = useState(false);
 
   useEffect(() => {
+    console.log("🔍 info.adult =", info.adult, typeof info.adult);
     isInWishlist(info.id).then(setLiked);
   }, [info.id]);
 

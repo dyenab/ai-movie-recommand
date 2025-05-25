@@ -106,5 +106,6 @@ async function fetchTMDB(title) {
 
   const res = await fetch(url);
   const data = await res.json();
+  console.log("📦 TMDB 검색 결과:", data);
   return data.results?.[0] || null;
 }

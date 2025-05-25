@@ -37,47 +37,49 @@ export default function SurveyModal({ onClose }) {
   };
 
   return (
-    <div className="modal">
-      <h2>좋아하는 걸 골라봐! AI가 추천해줄 거야 😎</h2>
-      <form onSubmit={handleSubmit}>
-        <br />
-        <label>좋아하는 장르는?</label><br />
-        {["액션", "코미디", "SF", "공포", "로맨스", "판타지", "범죄", "스릴러", "전쟁"].map((genre) => (
-          <label key={genre}>
-            <input type="checkbox" name="genre" value={genre} /> {genre}
-          </label>
-        ))}
+    <div className="modal-overlay">
+      <div className="modal">
+        <button className="close-btn" onClick={onClose}>x</button>
+        <h2>좋아하는 걸 골라봐! AI가 추천해줄 거야 😎</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="option-group">
+            <div className="option-group-title">좋아하는 장르는?</div>
+            {["액션", "코미디", "SF", "공포", "로맨스", "판타지", "범죄", "스릴러", "전쟁"].map((genre) => (
+              <label key={genre}>
+                <input type="checkbox" name="genre" value={genre} /> {genre}
+              </label>
+            ))}
+          </div>
 
-        <br /><br />
-        <label>좋아하는 계절은?</label><br />
-        {["봄", "여름", "가을", "겨울"].map((s) => (
-          <label key={s}>
-            <input type="checkbox" name="season" value={s} /> {s}
-          </label>
-        ))}
+          <div className="option-group">
+            <div className="option-group-title">좋아하는 계절은? (선택) </div>
+            {["봄", "여름", "가을", "겨울"].map((s) => (
+              <label key={s}>
+                <input type="checkbox" name="season" value={s} /> {s}
+              </label>
+            ))}
+          </div>
 
-        <br /><br />
-        <label>좋아하는 날씨는?</label><br />
-        {["맑음", "비", "눈", "흐림"].map((w) => (
-          <label key={w}>
-            <input type="checkbox" name="weather" value={w} /> {w}
-          </label>
-        ))}
+          <div className="option-group">
+            <div className="option-group-title">좋아하는 날씨는? (선택) </div>
+            {["맑음", "비", "눈", "흐림"].map((w) => (
+              <label key={w}>
+                <input type="checkbox" name="weather" value={w} /> {w}
+              </label>
+            ))}
+          </div>
 
-        <br /><br />
-        <p style={{ fontSize: "0.85rem", color: "#777" }}>
-          *AI의 추천은 정확하지 않을 수 있습니다
-        </p>
-
-        <button type="submit">제출하기</button>
-      </form>
-
-      {showButton && (
-        <button onClick={() => navigate("/result")}>
-          추천 영화 보러가기
-        </button>
-      )}
-      <button onClick={onClose}>닫기</button>
+          <p>*AI의 추천은 정확하지 않을 수 있습니다</p>
+          {!showButton ? (
+            <button type="submit" className="submit-btn">제출하기</button>
+          ) : (
+            <button onClick={() => navigate("/result")} className="submit-btn">
+            추천 영화 보러가기
+          </button>
+        )}
+        </form>
+      </div>
     </div>
   );
 }
+
