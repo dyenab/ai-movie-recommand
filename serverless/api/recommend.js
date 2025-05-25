@@ -1,5 +1,3 @@
-// /api/recommend.js (Vercel serverless function, 배우 조건 제거 버전)
-
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -9,11 +7,58 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Only POST allowed" });
+    return res.status(405).json({ message: "Only POST method allowed" });
   }
 
   res.setHeader("Access-Control-Allow-Origin", "*");
 
+  const path = req.url;
+
+  // ✅ searchMovie 기능 분기
+  if (path.includes("searchMovie")) {
+    const { query, genreId, sortType = "popularity" } = req.body;
+    const apiKey = process.env.TMDB_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({ error: "TMDB API Key is missing." });
+    }
+
+    let url = "";
+    let results = [];
+    const randomPage = Math.floor(Math.random() * 10) + 1;
+
+    try {
+      if (query) {
+        url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}&language=ko`;
+      } else if (genreId) {
+        let sortParam = "popularity.desc";
+        if (sortType === "release_date") {
+          sortParam = "release_date.desc";
+        } else if (sortType === "vote") {
+          sortParam = "vote_average.desc";
+        }
+
+        url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}&language=ko&sort_by=${sortParam}&page=${randomPage}`;
+      } else {
+        return res.status(400).json({ error: "query 또는 genreId 중 하나가 필요합니다." });
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+      results = data.results || [];
+
+      if (sortType === "random") {
+        results = results.sort(() => 0.5 - Math.random()).slice(0, 3);
+      }
+
+      return res.status(200).json({ results });
+    } catch (error) {
+      console.error("TMDB fetch error:", error);
+      return res.status(500).json({ error: "TMDB 요청 실패", detail: error.message });
+    }
+  }
+
+  // ✅ 기본 recommend 기능
   const { genres, weather, season } = req.body;
 
   if (!genres || !Array.isArray(genres) || genres.length === 0) {
@@ -22,13 +67,14 @@ export default async function handler(req, res) {
 
   try {
     const movies = await get3Movies({ genres, weather, season });
-    res.status(200).json({ movies });
+    return res.status(200).json({ movies });
   } catch (error) {
     console.error("❌ 서버 에러:", error);
-    res.status(500).json({ error: "추천 실패", detail: error.message });
+    return res.status(500).json({ error: "추천 실패", detail: error.message });
   }
 }
 
+// 🔽 Recommend용 GPT + TMDB 함수는 그대로
 async function get3Movies({ genres, weather, season }) {
   const movies = [];
   const seen = new Set();

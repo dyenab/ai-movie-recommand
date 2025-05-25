@@ -23,7 +23,7 @@ export default function SearchMovie() {
 
   const fetchMovies = async (body) => {
     try {
-      const res = await fetch(`/api/searchMovie`, {
+      const res = await fetch(`/api/recommend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
