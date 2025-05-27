@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     if (!apiKey) {
       return res
         .status(500)
-        .json({ error: "TMDB API Key is missing." });
+        .json({ error: "TMDB API Key X" });
     }
 
     let url = "";
@@ -63,7 +63,7 @@ export default async function handler(req, res) {
       const movies = await get3Movies({ genres, weather, season });
       return res.status(200).json({ movies });
     } catch (error) {
-      console.error("❌ 서버 에러:", error);
+      console.error("서버 에러:", error);
       return res
         .status(500)
         .json({ error: "추천 실패", detail: error.message });
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
 
   return res
     .status(400)
-    .json({ error: "query/genreId 또는 genres 중 하나는 반드시 포함되어야 합니다." });
+    .json({ error: "query/genreId 또는 genres 없음" });
 }
 
 
@@ -91,13 +91,15 @@ async function get3Movies({ genres, weather, season }) {
         .replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000]/g, "")
         .trim();
 
-      if (seen.has(clean)) continue;
+      if (seen.has(clean)) 
+        continue;
       seen.add(clean);
 
       const info = await fetchTMDB(clean);
       if (info) {
         movies.push(info);
-        if (movies.length >= 3) return movies;
+        if (movies.length >= 3) 
+          return movies;
       }
     }
 

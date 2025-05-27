@@ -1,0 +1,52 @@
+name: Deploy Frontend to Server
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build React App
+        working-directory: frontend
+        run: npm run build
+
+      - name: Move build to proxy/static
+        run: |
+          rm -rf proxy/static
+          mkdir -p proxy/static
+          cp -r frontend/dist/* proxy/static/
+
+      - name: Copy to Remote Server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "proxy/*"
+          target: "/home/ubuntu/app/proxy"
+
+      - name: Restart Docker
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/app/proxy
+            docker-compose down
+            docker-compose up -d --build
