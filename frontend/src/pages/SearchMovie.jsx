@@ -95,12 +95,6 @@ export default function SearchMovie() {
           >
             최신순
           </button>
-          <button
-            className={`sort-btn ${sortType === "random" ? "active" : ""}`}
-            onClick={() => handleSortChange("random")}
-          >
-            랜덤
-          </button>
         </div>
       </div>
 

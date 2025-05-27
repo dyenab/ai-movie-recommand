@@ -12,14 +12,7 @@ export default async function handler(req, res) {
 
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  const {
-    query,
-    genreId,
-    sortType = "popularity",
-    genres,
-    weather,
-    season,
-  } = req.body;
+  const { query, genreId, sortType = "popularity", genres, weather, season, } = req.body;
 
   const hasQuery = typeof query === "string" && query.trim() !== "";
   const hasGenreId = typeof genreId === "number" && !isNaN(genreId);
@@ -36,7 +29,6 @@ export default async function handler(req, res) {
 
     let url = "";
     let results = [];
-    const randomPage = Math.floor(Math.random() * 10) + 1;
 
     try {
       if (hasQuery) {
@@ -51,16 +43,12 @@ export default async function handler(req, res) {
           sortParam = "vote_average.desc";
         }
 
-        url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}&language=ko&sort_by=${sortParam}&page=${randomPage}`;
+        url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}&language=ko&sort_by=${sortParam}`;
       }
 
       const response = await fetch(url);
       const data = await response.json();
       results = data.results || [];
-
-      if (sortType === "random") {
-        results = results.sort(() => 0.5 - Math.random()).slice(0, 3);
-      }
 
       return res.status(200).json({ results });
     } catch (error) {
@@ -126,8 +114,7 @@ async function fetchGPT({ genres, weather, season, isRetry = false }) {
     season ? `계절: ${season}에 어울리는 영화` : "",
     "",
     isRetry
-      ? "※ 이전과 겹치지 않는 새로운 영화를 다시 추천해주세요."
-      : "",
+      ? "※ 이전과 겹치지 않는 새로운 영화를 다시 추천해주세요." : "",
     "위 조건을 고려해 영어 영화 제목을 최대 3개까지 추천해주세요.",
     "조건에 맞는 영화가 적다면 1~2개만 추천해도 괜찮습니다.",
     "- 실제 존재하는 영화만 추천해주세요",
