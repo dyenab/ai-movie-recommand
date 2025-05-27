@@ -73,7 +73,7 @@ export default function SurveyModal({ onClose }) {
           {!showButton ? (
             <button type="submit" className="submit-btn">제출하기</button>
           ) : (
-            <button onClick={() => navigate("/result")} className="submit-btn">
+            <button type="button" onClick={() => navigate("/result")} className="submit-btn">
             추천 영화 보러가기
           </button>
         )}

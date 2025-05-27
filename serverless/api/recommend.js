@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   const hasQuery = typeof query === "string" && query.trim() !== "";
   const hasGenreId = typeof genreId === "number" && !isNaN(genreId);
 
-  // ✅ TMDB 검색 기능
+  //TMDB 검색
   if (hasQuery || hasGenreId) {
     const apiKey = process.env.TMDB_API_KEY;
 
@@ -69,7 +69,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // ✅ GPT 추천 기능
+  //GPT 추천
   if (genres && Array.isArray(genres) && genres.length > 0) {
     try {
       const movies = await get3Movies({ genres, weather, season });
@@ -82,13 +82,11 @@ export default async function handler(req, res) {
     }
   }
 
-  // ❌ 그 외에는 잘못된 요청
   return res
     .status(400)
     .json({ error: "query/genreId 또는 genres 중 하나는 반드시 포함되어야 합니다." });
 }
 
-// ✅ GPT 추천 관련 함수들 (그대로 유지)
 
 async function get3Movies({ genres, weather, season }) {
   const movies = [];
