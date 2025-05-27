@@ -27,9 +27,9 @@ jobs:
 
       - name: Move build to proxy/static
         run: |
-          rm -rf proxy/static
-          mkdir -p proxy/static
-          cp -r frontend/dist/* proxy/static/
+          rm -rf proxy/static/dist
+          mkdir -p proxy/static/dist
+          cp -r frontend/dist/* proxy/static/dist
 
       - name: Copy to Remote Server
         uses: appleboy/scp-action@v0.1.4
