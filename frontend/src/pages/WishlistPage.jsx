@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getWishlist } from "../utils/wishlistDB";
-import MovieDetail from "../component/MovieDetail"; // 기존 카드 재사용
-import "./WishlistPage.css"; // (선택) 위시리스트 전용 스타일
+import { getWishlist } from "../utils/WishlistDB";
+import MovieDetail from "../component/MovieDetail";
+import "./WishlistPage.css";
 
 export default function WishlistPage() {
   const [movies, setMovies] = useState([]);
