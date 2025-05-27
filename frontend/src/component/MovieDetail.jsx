@@ -1,6 +1,6 @@
 import "./MovieDetail.css";
 import { useEffect, useState } from "react";
-import {addToWishlist, removeFromWishlist, isInWishlist, } from "../utils/wishlistDB";
+import {addToWishlist, removeFromWishlist, isInWishlist, } from "../utils/WishlistDB";
 
 export default function MovieDetail({ info }) {
   const [liked, setLiked] = useState(false);
