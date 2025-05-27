@@ -1,8 +1,8 @@
 {
   "routes": [
     {
-      "src": "/api/recommend",
-      "dest": "/api/recommend",
+      "src": "/",
+      "dest": "/api/recommend.js",
       "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"]
     }
   ]
