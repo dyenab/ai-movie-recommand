@@ -1,7 +1,7 @@
 services:
   nginx:
     build:
-      context: ./proxy
+      context: .
       dockerfile: Dockerfile
     container_name: nginx-proxy
     ports:
